@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { diagnosisAPI } from '../services/api';
 
 const EXAMPLE_SYMPTOMS = [
-  'fever, cough, shortness of breath',
+  'fever, cough, chest pain',
   'headache, nausea, dizziness',
   'chest pain, palpitations, shortness of breath',
   'rash, itching, swollen eyes',
