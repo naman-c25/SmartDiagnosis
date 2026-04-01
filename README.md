@@ -9,7 +9,8 @@ A full-stack medical diagnosis assistant that combines rule-based symptom parsin
 ```
 SmartDiagnosis/
 ├── backend/                   # Node.js + Express + MongoDB
-│   ├── server.js              # Entry point — DB connect + HTTP listen
+│   ├── server.js              # Entry point — cached DB connect, serverless handler
+│   ├── vercel.json            # Vercel routing config — all requests → server.js
 │   ├── src/
 │   │   ├── app.js             # Express app, CORS, routes, error handler
 │   │   ├── controllers/
@@ -26,6 +27,7 @@ SmartDiagnosis/
 │   └── .env                             # Your actual secrets (do not commit)
 │
 └── frontend/                  # React + Vite
+    ├── vercel.json            # SPA routing fix — all routes → index.html
     ├── src/
     │   ├── App.jsx            # Router + AnimatePresence wrapper
     │   ├── pages/
@@ -244,25 +246,31 @@ The frontend `.env` points directly to `http://localhost:5000/api`.
 
 ## Deployment
 
-### Backend — Render / Railway
+### Backend — Vercel
 
 1. Push code to GitHub
-2. Create a new **Web Service** on Render (or Railway)
-3. Set build command: `npm install`
-4. Set start command: `node server.js`
-5. Add environment variables:
+2. Import the repo on [vercel.com](https://vercel.com) → set **Root Directory** to `backend`
+3. Set start command: `node server.js`
+4. Add environment variables:
    - `NODE_ENV=production`
-   - `PORT=5000` (or let the platform assign)
+   - `PORT=5000`
    - `MONGO_URI=mongodb+srv://...`
    - `GROQ_API_KEY=gsk_...`
-   - `ALLOWED_ORIGINS=https://your-frontend.vercel.app`
+   - `ALLOWED_ORIGINS=https://your-frontend.vercel.app` (no trailing slash)
+5. `vercel.json` in `backend/` handles all routing automatically
 
-### Frontend — Vercel / Netlify
+> **MongoDB Atlas:** Go to Network Access → Add IP Address → **Allow Access from Anywhere** (`0.0.0.0/0`) so Vercel's dynamic IPs can connect.
 
-1. Set build command: `npm run build`
-2. Set output directory: `dist`
-3. Add environment variable:
-   - `VITE_API_URL=https://your-backend.onrender.com/api`
+> **Serverless note:** `server.js` caches the MongoDB connection with an `isConnected` flag to prevent timeout errors on cold starts.
+
+### Frontend — Vercel
+
+1. Import the same repo → set **Root Directory** to `frontend`
+2. Set build command: `npm run build`
+3. Set output directory: `dist`
+4. Add environment variable:
+   - `VITE_API_URL=https://your-backend.vercel.app/api`
+5. `vercel.json` in `frontend/` rewrites all routes to `index.html` so React Router works correctly on direct URL access (e.g. `/history`)
 
 ---
 
